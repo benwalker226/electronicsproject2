@@ -74,35 +74,6 @@ void LCR_Set_As_Input(int bit, GPIO_TypeDef* port, enum eTermType eTT) {
 	port->PUPDR = (port->PUPDR & bitMask) | ((unsigned int)eTT << 2*bit);
 }
 
-//////////////////////////////////////////////////////
-// PWM driver.  Sets up PB4 as a PWM output with the
-// given frequency and duty cycle.  Uses TIM16.
-void LCR_PWM_Init(int freq, int dutyCycle) {
-	  GPIOB->MODER = (GPIOB->MODER & ~GPIO_MODER_MODER4) | 0x2 << GPIO_MODER_MODER4_Pos;
-	  GPIOB->AFR[0] = (GPIOB->AFR[0] & 0xfff0ffff) | 0x00010000;
-	  RCC->APB2ENR |= RCC_APB2ENR_TIM16EN;
-
-	  // Set-up TIM16 to time the ADC conversions:
-	  uint32_t DivRatio = SystemCoreClock / freq;
-	  uint32_t ARRvalue = DivRatio;
-	  uint32_t PSCvalue = 0;
-	  while (ARRvalue > 65535) {
-	  	PSCvalue++;
-	   	ARRvalue = DivRatio / (PSCvalue + 1);
-	  }
-	  TIM16->PSC = PSCvalue;
-	  TIM16->ARR = ARRvalue - 1;
-	  TIM16->CCR1 = (uint32_t)(ARRvalue * dutyCycle / 100);
-
-	  TIM16->CCMR1 &= ~TIM_CCMR1_OC1M;  // Set PWM mode 1
-	  TIM16->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2;
-	  TIM16->CCER |= TIM_CCER_CC1E;	   // Enable capture mode
-	  TIM16->EGR |= TIM_EGR_UG;		   // Update registers
-	  TIM16->BDTR |= TIM_BDTR_MOE;     // Main output enable on
-	  TIM16->CR1 |= TIM_CR1_CEN;	   // Enable timer
-}
-
-
 ////////////////////////////////////////////////////////
 // Switches and other input driver functions start here:
 //
@@ -126,17 +97,16 @@ void LCR_Init_Inputs(void) {
 }
 void LCR_Switch_Init(void) {
 	// Sets up the IO associated with the controls as GPIO ports.
-	// Enable clocks to GPIOA and GPIOB:
-	RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN;
+	// Enable clocks to GPIOF and GPIOB:
+	RCC->AHBENR |= RCC_AHBENR_GPIOFEN | RCC_AHBENR_GPIOBEN;
 
 	// Set PF0, PB1 as digital inputs with pull-up resistors:
 	LCR_Set_As_Input(1, GPIOB, PULLUP);
 	LCR_Set_As_Input(0, GPIOF, PULLUP);
 }
 unsigned int LCR_Switch_GetState (unsigned int which) {
-	if (which == 0) return GPIOA->IDR & (1UL << 3) ? 1 : 0;
-	else if (which == 1) return GPIOA->IDR & (1UL << 11) ? 1 : 0;
-	else if (which == 2) return GPIOB->IDR & (1UL << 5) ? 1 : 0;
+	if (which == 0) return GPIOF->IDR & (1UL << 0) ? 1 : 0;
+	else if (which == 2) return GPIOB->IDR & (1UL << 1) ? 1 : 0;
 	else return 0;
 }
 
@@ -154,22 +124,19 @@ unsigned int LCR_Switch_GetState (unsigned int which) {
 void LCD_Set_Data(uint8_t data) {
 	// This takes the lowest four bits in data and puts them on the
 	// relevant pins of the LCD (LCD_D4 to LCD_D7) in four-bit mode.
-	GPIOB->BSRR = (data & 0x1) ? 0x1 << 1 : 0x1 << 17;
-	GPIOB->BSRR = (data & 0x2) ? 0x1 << 6 : 0x1 << 22;
+	GPIOA->BSRR = (data & 0x1) ? 0x1 << 12 : 0x1 << 28;
+	GPIOB->BSRR = (data & 0x2) ? 0x1 << 0 : 0x1 << 16;
 	GPIOB->BSRR = (data & 0x4) ? 0x1 << 7 : 0x1 << 23;
-	GPIOB->BSRR = (data & 0x8) ? 0x1 << 0 : 0x1 << 16;
+	GPIOB->BSRR = (data & 0x8) ? 0x1 << 6 : 0x1 << 22;
 }
 void LCD_Set_RS(uint8_t data) {
 	// Sets the RS control line to either high or low:
-	GPIOA->BSRR = data ? 0x1 << 8 : 0x1 << 24;
+	GPIOA->BSRR = data ? 0x1 << 10 : 0x1 << 26;
 }
-void LCD_Set_RW(uint8_t data) {
-	// Sets the RW control line to either high or low:
-	GPIOF->BSRR = data ? 0x1 << 1 : 0x1 << 17;
-}
+
 void LCD_Set_E(uint8_t data) {
 	// Sets the RW control line to either high or low:
-	GPIOF->BSRR = data ? 0x1 << 0 : 0x1 << 16;
+	GPIOA->BSRR = data ? 0x1 << 9 : 0x1 << 25;
 }
 uint8_t LCR_LCD_IsBusy () {
   // For now, I'll just use the delay version of this.  Wait for a ms:
@@ -192,17 +159,16 @@ void LCR_LCD_Write (enum eLCD_OP op, uint8_t data) {
   LCR_MicroDelay(LCD_DELAY_CONST); LCD_Set_E(0);
 }
 void LCR_LCD_Init (void) {
-  // The LCD uses GPIOs A, B and F, so these clocks are required:
-  RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOFEN;
+  // The LCD uses GPIOs A, B so these clocks are required:
+  RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN;
 
-  // Relevant control GPIO pins are PA8 (RS), PF1 (RW), PF0 (E)
-  LCR_Set_As_Output(8, GPIOA);
-  LCR_Set_As_Output(1, GPIOF);
-  LCR_Set_As_Output(0, GPIOF);
+  // Relevant control GPIO pins are PA10 (RS), PF0 (E)
+  LCR_Set_As_Output(10, GPIOA);
+  LCR_Set_As_Output(9, GPIOA);
 
-  // And for data, GPIOB 1, 6, 7 and 0
+  // And for data, GPIOA 12 and GPIOB 6, 7 and 0
+  LCR_Set_As_Output(12, GPIOA);
   LCR_Set_As_Output(0, GPIOB);
-  LCR_Set_As_Output(1, GPIOB);
   LCR_Set_As_Output(6, GPIOB);
   LCR_Set_As_Output(7, GPIOB);
 

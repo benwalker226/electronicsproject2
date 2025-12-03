@@ -43,9 +43,6 @@ extern void LCR_LED_Off (unsigned int num);
 extern void LCR_LED_Toggle (unsigned int num);
 extern unsigned int LCR_LED_GetState (unsigned int num);
 
-// PWM setup
-extern void LCR_PWM_Init(int freq, int dutyCycle);
-
 // Switch Definitions
 extern void LCR_Switch_Init (void);
 extern unsigned int LCR_Switch_GetState (unsigned int);
