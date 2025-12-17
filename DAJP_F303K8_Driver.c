@@ -105,9 +105,13 @@ void LCR_Switch_Init(void) {
 	LCR_Set_As_Input(0, GPIOF, PULLUP);
 }
 unsigned int LCR_Switch_GetState (unsigned int which) {
-	if (which == 0) return GPIOF->IDR & (1UL << 0) ? 1 : 0;
-	else if (which == 2) return GPIOB->IDR & (1UL << 1) ? 1 : 0;
-	else return 0;
+	if (which == 0) {
+		return GPIOF->IDR & (1UL << 0) ? 1 : 0;
+	}
+	else if (which == 1){
+		return GPIOB->IDR & (1UL << 1) ? 1 : 0;
+	}
+	else return 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -135,7 +139,7 @@ void LCD_Set_RS(uint8_t data) {
 }
 
 void LCD_Set_E(uint8_t data) {
-	// Sets the RW control line to either high or low:
+	// Sets the E control line to either high or low:
 	GPIOA->BSRR = data ? 0x1 << 9 : 0x1 << 25;
 }
 uint8_t LCR_LCD_IsBusy () {
@@ -162,7 +166,7 @@ void LCR_LCD_Init (void) {
   // The LCD uses GPIOs A, B so these clocks are required:
   RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN;
 
-  // Relevant control GPIO pins are PA10 (RS), PF0 (E)
+  // Relevant control GPIO pins are PA10 (RS), PA9 (E)
   LCR_Set_As_Output(10, GPIOA);
   LCR_Set_As_Output(9, GPIOA);
 
@@ -194,7 +198,6 @@ void LCR_LCD_Init (void) {
 
   LCR_MicroDelay(15000);
   LCD_Set_RS(0); // Set LCD_RS low
-  LCD_Set_RW(0); // Set LCD_RW low
   LCD_Set_Data(3);  // Set the LCD_D4-D7 to 0b0011
   LCR_MicroDelay(5000); LCD_Set_E(1); // Set LCD_E high
   LCR_MicroDelay(5000); LCD_Set_E(0); // Set LCD_E low
@@ -209,7 +212,7 @@ void LCR_LCD_Init (void) {
   LCD_Set_Data(2);  // Set the LCD_D4-D7 to 0b0010
   LCR_MicroDelay(5000); LCD_Set_E(1); // Set LCD_E high
   LCR_MicroDelay(5000); LCD_Set_E(0); // Set LCD_E low
-
+  
   // Now can set the other control bits: two-line and 5*8 pixels
   while (LCR_LCD_IsBusy());
   LCR_LCD_Write(WRITE_INSTRUCTION, 0x28);
@@ -246,8 +249,7 @@ void LCR_LCD_WriteChar (char ch) {
 }
 void LCR_LCD_WriteString (char *s, int maxLength) {
   while(*s && maxLength-- > 0) {
-	// LCR_MicroDelay(10000); // This works, but
-    while (LCR_LCD_IsBusy()){} // This does not
+	LCR_MicroDelay(10000);
     LCR_LCD_Write(WRITE_DATA, *s++);
   }
 }

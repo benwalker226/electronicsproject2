@@ -41,7 +41,6 @@ extern void LCR_LED_Init (void);
 extern void LCR_LED_On (unsigned int num);
 extern void LCR_LED_Off (unsigned int num);
 extern void LCR_LED_Toggle (unsigned int num);
-extern unsigned int LCR_LED_GetState (unsigned int num);
 
 // Switch Definitions
 extern void LCR_Switch_Init (void);
