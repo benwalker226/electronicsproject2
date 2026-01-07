@@ -110,6 +110,34 @@ void LCR_Meter_Run(void) {
     LCR_LCD_Clear();
 
     while (1) {
+
+		/* Acquire "measureButton" semaphore */
+		if (LCR_Switch_GetState(1) == 0) // PB1 = MEAS
+		{
+			/* Measurement flowchart section start */
+			LCR_PerformMeasurement(&g_measurement);
+
+			/* Measurement flowchart section end */
+
+			/* temporary debug - Display Results */
+			char line[17]
+
+			LCR_LCD_Clear();
+
+			snprintf(line, 16, "V: %.2f V", g_measurement.voltage);
+			LCR_LCD_GoToXY(0, 0);
+			LCR_LCD_WriteString(line, 16);
+
+			snprintf(line, 17, "I: %.3f A", g_measurement.current);
+			LCR_LCD_GoToXY(0, 1);
+			LCR_LCD_WriteString(Line, 16);
+
+			/* - debounce - */
+			while (LCR_Switch_GetState(1) == 0);
+			HAL_Delay(200);
+		}
+
+		Hal_Delay(50)
         // --- CHECK BUTTON 0 (PF0) ---
         LCR_LCD_GoToXY(0, 0); // Top Line
         if (LCR_Switch_GetState(0) == 0) {
@@ -258,5 +286,6 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 
