@@ -16,7 +16,7 @@
 // Feedback switch pin index
 #define FEEDBACK_SWITCH
 
-void LCR_DoMeasurement(LCR_Measurement_t * result){
+void LCR_PerformMeasurement(LCR_Measurement_t * result){
 
   uint32_t RawVoltage;
   uint32_t rawCurrent;
