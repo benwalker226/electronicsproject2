@@ -10,6 +10,6 @@ typedef struct {
   float highRange; // Feedback resistor state
 } LCR_Measurement_t;
 
-void LCR_DoMeasurement(LCR_Measurement_t *result);
+void LCR_PerformMeasurement(LCR_Measurement_t *result);
 
 #endif
