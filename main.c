@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 
 #include "DAJP_F303K8_Driver.h"
+#include "lcr_measure.h" // include measure function
 #include <stdio.h>
 #include <math.h>
 
@@ -255,3 +256,4 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
