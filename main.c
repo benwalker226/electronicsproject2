@@ -59,6 +59,8 @@
 uint32_t sine_wave[WAVEFORM_SAMPLES];
 uint32_t V_data[WAVEFORM_SAMPLES * 3];
 
+LCR_Measurement_t g_measurement;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -256,4 +258,5 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
