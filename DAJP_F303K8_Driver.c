@@ -87,6 +87,9 @@ void LCR_Init_Inputs(void) {
 	GPIOA->MODER |= 0x0f;
 	GPIOA->PUPDR &= ~0x0f;
 
+	// Set PA0 and PA1 as analogue inputs with no pulls:
+	LCR_Set_As_Input(8, GPIOA, NOPULL);
+
 	// Enable the clock to the ADC:
 	RCC->AHBENR |= RCC_AHBENR_ADC12EN;
 
@@ -465,3 +468,4 @@ void LCR_FuncGen_Update(uint32_t rate) {
     // And re-enable TIM6:
     TIM6->CR1 |= TIM_CR1_CEN;
 }
+
