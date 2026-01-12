@@ -117,27 +117,33 @@ void LCR_Meter_Run(void) {
 			/* Measurement flowchart section start */
 			LCR_PerformMeasurement(&g_measurement);
 
-			/* Measurement flowchart section end */
-
 			/* temporary debug - Display Results */
-			char line[17]
+			char line[17];
 
 			LCR_LCD_Clear();
 
-			snprintf(line, 16, "V: %.2f V", g_measurement.voltage);
+			snprintf(line, sizeof(line), "Vrms:%.2f Ir", g_measurement.v_rms);
 			LCR_LCD_GoToXY(0, 0);
 			LCR_LCD_WriteString(line, 16);
 
-			snprintf(line, 17, "I: %.3f A", g_measurement.current);
+			// Show |Z|
+			if (g_measurement.derived_C > 0.0f) {
+				snprintf(line, sizeof(line), "|Z|:%4.0f C", g_measurement.z_mag);
+			} else if (g_measurement.derived_L > 0.0f) {
+				snprintf(line, sizeof(line), "|Z|:%4.0f L", g_measurement.z_mag);
+			} else {
+				snprintf(line, sizeof(line), "|Z|:%4.0f R", g_measurement.z_mag);
+			}
+
 			LCR_LCD_GoToXY(0, 1);
 			LCR_LCD_WriteString(Line, 16);
 
 			/* - debounce - */
-			while (LCR_Switch_GetState(1) == 0);
+			while (LCR_Switch_GetState(1) == 0) {}
 			HAL_Delay(200);
 		}
 
-		Hal_Delay(50)
+		HAL_Delay(50)
         // --- CHECK BUTTON 0 (PF0) ---
         LCR_LCD_GoToXY(0, 0); // Top Line
         if (LCR_Switch_GetState(0) == 0) {
@@ -203,6 +209,9 @@ int main(void)
 	  // Initialize the LCD screen (uses PA9, PA10, PA12, PB0, PB6, PB7)
 	  LCR_LCD_Init();
 
+	  // Sample init once
+	  LCR_ADC_Sample_Init(); 
+	  
 	  // Start the Function Generator (PA4) to output the AC excitation signal
 	  LCR_FuncGen_Init(sine_wave, WAVEFORM_SAMPLES, TEST_FREQ);
 
@@ -286,6 +295,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 
 
