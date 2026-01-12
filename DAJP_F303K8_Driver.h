@@ -80,4 +80,7 @@ extern void LCR_LCD_DefineChar (int ch, char *data);
 // Setting up the GPIO for the buttons, switches and ADC
 extern void LCR_Init_Inputs(void);
 
+extern unsigned int LCR_RangeSwitch_Get(void); // Reads PA8
+
 #endif /* INC_DAJP_F303K8_DRIVER_H_ */
+
