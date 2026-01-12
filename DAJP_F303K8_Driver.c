@@ -267,6 +267,10 @@ void LCR_LCD_DefineChar (int ch, char *data) {
 	LCR_LCD_Write(WRITE_INSTRUCTION, 0x80);
 }
 
+unsigned int LCR_RangeSwitch_Get(void) {
+	return (GPIOA->IDR & (1UL << 8)) ? 1 : 0; // PA8
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // ADC Sampling Functions.  These allow the ADC to take a series of
 // regularly spaced samples of the voltage on CH1 and CH2 and store
@@ -468,4 +472,5 @@ void LCR_FuncGen_Update(uint32_t rate) {
     // And re-enable TIM6:
     TIM6->CR1 |= TIM_CR1_CEN;
 }
+
 
