@@ -2,7 +2,7 @@
 #define LCR_MEASURE_H
 
 #include <stdint.h>
-#include <STDbool.h>
+#include <stdbool.h>
 
 typedef struct {
   bool highRange; // feedback resistor state (range switch)
