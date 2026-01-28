@@ -53,7 +53,7 @@ void LCR_Set_As_Output(int bit, GPIO_TypeDef* port) {
     // OSPEEDR set to "10" (high-speed - perhaps not required)
     // PUPDR set to "00" (no pull-up or pull-down)
 	  // It also sets the output low.
-	port->BSRR = 1UL < (16 + bit);
+	port->BSRR = 1UL << (16 + bit);
 	unsigned long bitMask = ~(3UL << 2*bit);
 	port->MODER = (port->MODER & bitMask) | (1UL << 2*bit);
 	port->OTYPER &= ~(1UL << bit);
@@ -472,5 +472,6 @@ void LCR_FuncGen_Update(uint32_t rate) {
     // And re-enable TIM6:
     TIM6->CR1 |= TIM_CR1_CEN;
 }
+
 
 
