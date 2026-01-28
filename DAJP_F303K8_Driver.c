@@ -331,15 +331,23 @@ void LCR_ADC_GetSamples(uint32_t *data, uint32_t length, uint32_t rate) {
 	// have a size of at least length * 2.
 
 	DMA1->IFCR = DMA_IFCR_CGIF1; 
+	
     // Set up DMA1 channel one for the ADC capture (ADC is always on DMA Channel one):
-    DMA1_Channel1->CCR &= ~0x01;    // Disable the DMA channel
-    DMA1_Channel1->CPAR = (uint32_t) &ADC1->DR;  // Set peripheral address (source of data)
-    DMA1_Channel1->CMAR = (uint32_t) data;       // Set memory address (destination of data)
+    DMA1_Channel1->CCR &= ~DMA_CCR_EN;   // Disable the DMA channel
+    DMA1_Channel1->CPAR = (uint32_t)&ADC1->DR;  // Set peripheral address (source of data)
+    DMA1_Channel1->CMAR = (uint32_t)data;       // Set memory address (destination of data)
     DMA1_Channel1->CNDTR = length * 2;           // Number of transfers
-    // DMA1_Channel1->CCR = 0x1A80;    // Set priority, increments, circular mode, bit-widths, etc
+    
+	// DMA1_Channel1->CCR = 0x1A80;    // Set priority, increments, circular mode, bit-widths, etc
     // DMA1_Channel1->CCR |= 0x01;     // Enable the DMA channel
-	DMA1_Channel1->CCR = 0;
-	DMA1_Channel1->CCR |= DMA_CCR_PL_1; 
+	
+	DMA1_Channel1->CCR = 
+		DMA_CCR_MINC |
+		DMA_CCR_PL_1 |
+		DMA_CCR_MSIZE_1 |
+		DMA_CCR_PSIZE_1;
+	
+	DMA1_Channel1->CCR |= DMA_CCR_EN; 
 
     // Set-up TIM2 to time the ADC conversions:
     uint32_t DivRatio = SystemCoreClock / rate;
@@ -476,6 +484,7 @@ void LCR_FuncGen_Update(uint32_t rate) {
     // And re-enable TIM6:
     TIM6->CR1 |= TIM_CR1_CEN;
 }
+
 
 
 
