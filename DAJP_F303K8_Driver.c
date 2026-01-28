@@ -53,7 +53,7 @@ void LCR_Set_As_Output(int bit, GPIO_TypeDef* port) {
     // OSPEEDR set to "10" (high-speed - perhaps not required)
     // PUPDR set to "00" (no pull-up or pull-down)
 	  // It also sets the output low.
-	port->BSRR = 1UL << (16 + bit);
+	port->BSRR = 1UL < (16 + bit);
 	unsigned long bitMask = ~(3UL << 2*bit);
 	port->MODER = (port->MODER & bitMask) | (1UL << 2*bit);
 	port->OTYPER &= ~(1UL << bit);
@@ -330,24 +330,13 @@ void LCR_ADC_GetSamples(uint32_t *data, uint32_t length, uint32_t rate) {
 	// two samples are returned for each trigger, so the data array needs to
 	// have a size of at least length * 2.
 
-	DMA1->IFCR = DMA_IFCR_CGIF1; 
-	
     // Set up DMA1 channel one for the ADC capture (ADC is always on DMA Channel one):
-    DMA1_Channel1->CCR &= ~DMA_CCR_EN;   // Disable the DMA channel
-    DMA1_Channel1->CPAR = (uint32_t)&ADC1->DR;  // Set peripheral address (source of data)
-    DMA1_Channel1->CMAR = (uint32_t)data;       // Set memory address (destination of data)
+    DMA1_Channel1->CCR &= ~0x01;    // Disable the DMA channel
+    DMA1_Channel1->CPAR = (uint32_t) &ADC1->DR;  // Set peripheral address (source of data)
+    DMA1_Channel1->CMAR = (uint32_t) data;       // Set memory address (destination of data)
     DMA1_Channel1->CNDTR = length * 2;           // Number of transfers
-    
-	// DMA1_Channel1->CCR = 0x1A80;    // Set priority, increments, circular mode, bit-widths, etc
-    // DMA1_Channel1->CCR |= 0x01;     // Enable the DMA channel
-	
-	DMA1_Channel1->CCR = 
-		DMA_CCR_MINC |
-		DMA_CCR_PL_1 |
-		DMA_CCR_MSIZE_1 |
-		DMA_CCR_PSIZE_1;
-	
-	DMA1_Channel1->CCR |= DMA_CCR_EN; 
+    DMA1_Channel1->CCR = 0x1A80;    // Set priority, increments, circular mode, bit-widths, etc
+    DMA1_Channel1->CCR |= 0x01;     // Enable the DMA channel
 
     // Set-up TIM2 to time the ADC conversions:
     uint32_t DivRatio = SystemCoreClock / rate;
@@ -366,10 +355,9 @@ void LCR_ADC_GetSamples(uint32_t *data, uint32_t length, uint32_t rate) {
     TIM2->CR1 |= TIM_CR1_CEN;    // Set the timer going
 
     // Now wait for the DMA to complete before returning:
-    while ((DMA1->ISR & DMA_ISR_TCIF1) == 0) {
-		LCR_MicroDelay(1000); // timeout protection
-	}
-	DMA1->IFCR = DMA_IFCR_CTCIF1;
+    while (DMA1_Channel1->CNDTR > 0) {
+    	LCR_MicroDelay(1000);
+    }
     TIM2->CR1 &= ~TIM_CR1_CEN;    // Stop the timer
 }
 
@@ -484,8 +472,4 @@ void LCR_FuncGen_Update(uint32_t rate) {
     // And re-enable TIM6:
     TIM6->CR1 |= TIM_CR1_CEN;
 }
-
-
-
-
 
