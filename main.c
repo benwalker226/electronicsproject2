@@ -143,7 +143,7 @@ void LCR_Meter_Run(void) {
 			HAL_Delay(200);
 		}
 
-		HAL_Delay(50)
+		HAL_Delay(50);
         // --- CHECK BUTTON 0 (PF0) ---
         LCR_LCD_GoToXY(0, 0); // Top Line
         if (LCR_Switch_GetState(0) == 0) {
@@ -295,6 +295,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 
 
