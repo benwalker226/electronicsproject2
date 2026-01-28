@@ -115,7 +115,7 @@ void LCR_Meter_Run(void) {
 		if (LCR_Switch_GetState(1) == 0) // PB1 = MEAS
 		{
 			/* Measurement flowchart section start */
-			LCR_PerformMeasurement(&g_measurement);
+			LCR_PerformMeasurement(&g_measurement, TEST_FREQ);
 
 			/* temporary debug - Display Results */
 			char line[17];
@@ -295,6 +295,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 
 
