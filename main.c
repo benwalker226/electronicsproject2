@@ -27,6 +27,7 @@
 #include "lcr_measure.h" // include measure function
 #include <stdio.h>
 #include <math.h>
+#include "green_section.h"
 
 /* USER CODE END Includes */
 
@@ -117,26 +118,7 @@ void LCR_Meter_Run(void) {
 			/* Measurement flowchart section start */
 			LCR_PerformMeasurement(&g_measurement, TEST_FREQ);
 
-			/* temporary debug - Display Results */
-			char line[17];
-
-			LCR_LCD_Clear();
-
-			snprintf(line, sizeof(line), "Vrms:%.2f Ir", g_measurement.v_rms);
-			LCR_LCD_GoToXY(0, 0);
-			LCR_LCD_WriteString(line, 16);
-
-			// Show |Z|
-			if (g_measurement.derived_C > 0.0f) {
-				snprintf(line, sizeof(line), "|Z|:%4.0f C", g_measurement.z_mag);
-			} else if (g_measurement.derived_L > 0.0f) {
-				snprintf(line, sizeof(line), "|Z|:%4.0f L", g_measurement.z_mag);
-			} else {
-				snprintf(line, sizeof(line), "|Z|:%4.0f R", g_measurement.z_mag);
-			}
-
-			LCR_LCD_GoToXY(0, 1);
-			LCR_LCD_WriteString(line, 16);
+			UI_GreenSectionLoop(&g_measurement);
 
 			/* - debounce - */
 			while (LCR_Switch_GetState(1) == 0) {}
@@ -295,6 +277,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 
 
