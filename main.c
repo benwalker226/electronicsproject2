@@ -136,7 +136,7 @@ void LCR_Meter_Run(void) {
 			}
 
 			LCR_LCD_GoToXY(0, 1);
-			LCR_LCD_WriteString(Line, 16);
+			LCR_LCD_WriteString(line, 16);
 
 			/* - debounce - */
 			while (LCR_Switch_GetState(1) == 0) {}
@@ -295,6 +295,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 
 
