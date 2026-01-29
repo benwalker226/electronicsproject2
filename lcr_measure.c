@@ -21,7 +21,8 @@
 
 static uint32_t adcBuf[N_SAMPLES * 2];      // interleaved CH1,CH2,CH1,CH2...
 
-static inline float adc_to_volts(uint32_t code) {
+static inline float adc_to_volts(uint32_t code)
+{
     return ((float)code / ADC_MAX) * VREF;
 }
 
@@ -53,7 +54,8 @@ void LCR_PerformMeasurement(LCR_Measurement_t *result, float freq_hz)
 
     float V_sq = 0, I_sq = 0;
 
-    for (int n = 0; n < N_SAMPLES; n++) {
+    for (int n = 0; n < N_SAMPLES; n++)
+    {
         // interleaved: [V0, I0, V1, I1, ...]
         float v = adc_to_volts(adcBuf[2*n + 0]) - VBIAS;  // remove DC bias
         float i_sense = adc_to_volts(adcBuf[2*n + 1]) - VBIAS;
@@ -94,7 +96,8 @@ void LCR_PerformMeasurement(LCR_Measurement_t *result, float freq_hz)
 
     // 5) Compute complex impedance Z = V / I
     float denom = (I_re*I_re + I_im*I_im);
-    if (denom < 1e-12f) {
+    if (denom < 1e-12f)
+    {
         // Avoid divide by zero
         result->z_real = 0;
         result->z_imag = 0;
@@ -118,13 +121,17 @@ void LCR_PerformMeasurement(LCR_Measurement_t *result, float freq_hz)
     result->derived_C = 0.0f;
     result->derived_L = 0.0f;
 
-    if (freq_hz > 0.0f) {
+    if (freq_hz > 0.0f)
+    {
         float w = 2.0f * (float)M_PI * freq_hz;
 
-        if (Z_im < 0.0f) {
+        if (Z_im < 0.0f)
+        {
             // capacitive: Xc = -1/(wC) => C = -1/(w*X)
             result->derived_C = -1.0f / (w * Z_im);
-        } else if (Z_im > 0.0f) {
+        }
+        else if (Z_im > 0.0f)
+        {
             // inductive: Xl = wL => L = X/w
             result->derived_L = Z_im / w;
         }
